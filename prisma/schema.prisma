@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AnalyticsLog {
+  id         String   @id @default(uuid())
+  userId     String
+  moodCounts Json
+  trendData  Json
+  createdAt  DateTime @default(now())
+  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+model JournalEntry {
+  id          String     @id @default(uuid())
+  userId      String
+  moodEntryId String?
+  title       String
+  content     String
+  imageUrl    String?
+  createdAt   DateTime   @default(now())
+  MoodEntry   MoodEntry? @relation(fields: [moodEntryId], references: [id])
+  User        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+model MoodEntry {
+  id           String         @id @default(uuid())
+  userId       String
+  mood         String
+  note         String?
+  createdAt    DateTime       @default(now())
+  JournalEntry JournalEntry[]
+  User         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+}
+
+model Reminder {
+  id        String   @id @default(uuid())
+  userId    String
+  message   String
+  time      DateTime
+  repeat    String   @default("none")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, time])
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  jwtToken  String   @unique
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([jwtToken])
+  @@index([userId])
+}
+
+model MotivationalMessage {
+  id        String   @id @default(uuid())
+  moodType  String
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([moodType])
+}
+
+model User {
+  id           String         @id @default(uuid())
+  name         String
+  email        String         @unique
+  password     String?
+  avatar       String?
+  googleId     String?        @unique
+  theme        String         @default("light")
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  AnalyticsLog AnalyticsLog[]
+  JournalEntry JournalEntry[]
+  MoodEntry    MoodEntry[]
+  Notification Notification[]
+  Reminder     Reminder[]
+  Session      Session[]
+
+  @@index([email])
+}
