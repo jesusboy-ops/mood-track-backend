@@ -54,22 +54,38 @@ const PORT = process.env.PORT || 3000;
 
 const startServer = async () => {
   try {
+    console.log('🚀 Starting MoodMate Backend...');
+    console.log('📊 Environment:', process.env.NODE_ENV);
+    console.log('🔌 Port:', PORT);
+    console.log('💾 Database URL exists:', !!process.env.DATABASE_URL);
+    console.log('🔑 JWT Secret exists:', !!process.env.JWT_SECRET);
+    
     // Connect to database
+    console.log('📡 Connecting to database...');
     await connectDatabase();
+    console.log('✅ Database connected successfully');
     
     // Initialize Socket.io
+    console.log('🔌 Setting up Socket.io...');
     setupSocket(server);
+    console.log('✅ Socket.io configured');
     
     // Start reminder scheduler
+    console.log('⏰ Starting reminder scheduler...');
     startReminderScheduler();
+    console.log('✅ Reminder scheduler started');
     
     // Start motivational notification scheduler
+    console.log('💪 Starting motivation scheduler...');
     startMotivationScheduler();
+    console.log('✅ Motivation scheduler started');
     
     // Start server
-    server.listen(PORT, () => {
-      logger.info(`Server running on port ${PORT}`);
-      logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    server.listen(PORT, '0.0.0.0', () => {
+      logger.info(`🚀 Server running on port ${PORT}`);
+      logger.info(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
+      logger.info(`💾 Database connected: ${!!process.env.DATABASE_URL}`);
+      logger.info(`🔗 Health check: http://0.0.0.0:${PORT}/api/health`);
     });
   } catch (error) {
     logger.error('Failed to start server:', error);
